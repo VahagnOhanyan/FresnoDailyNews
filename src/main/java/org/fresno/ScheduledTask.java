@@ -69,7 +69,7 @@ public class ScheduledTask {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println("forms: " + forms);
+                System.out.println("forms:  " + forms);
                 v.setForms(forms.trim());
                 verbsRepository.save(v);
             }
