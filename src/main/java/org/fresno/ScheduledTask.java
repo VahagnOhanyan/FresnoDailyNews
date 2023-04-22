@@ -32,7 +32,7 @@ public class ScheduledTask {
     @Value("${channel.id}")
     String id;
 
-    @Scheduled(fixedRate = 1000000)
+  //  @Scheduled(fixedRate = 1000000)
     public void updateVerbs() {
         /*for (String l :
                 letters) {
