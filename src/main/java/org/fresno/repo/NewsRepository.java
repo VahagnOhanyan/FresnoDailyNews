@@ -15,6 +15,6 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     int updateIsPublishedById(boolean isPublished, Long id);
 
     List<News> findByIsPublished(boolean isPublished);
-    List<News> findByTitle(String title);
+
 
 }

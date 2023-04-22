@@ -56,11 +56,11 @@ public class News {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         News news = (News) o;
-        return Objects.equals(title.toLowerCase().trim(), news.title.toLowerCase().trim()) && Objects.equals(description.toLowerCase().trim(), news.description.toLowerCase().trim()) && Objects.equals(summary.toLowerCase().trim(), news.summary.toLowerCase().trim());
+        return Objects.equals(url, news.url);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, url, domain, country, language, pubDate, title, description, content, summary);
+        return Objects.hash(url);
     }
 }

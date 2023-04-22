@@ -16,7 +16,7 @@ public class CreateCommandHandler implements CommandHandler {
     private final UserService userService;
 
     @Override
-    public void handlerMesaage(Update update, SendMessage response) {
+    public void handlerMessage(Update update, SendMessage response) {
         String telegramId = String.valueOf(update.getMessage().getChatId());
         String firstName = update.getMessage().getFrom().getFirstName();
         String lastName = update.getMessage().getFrom().getLastName();

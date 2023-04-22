@@ -6,5 +6,5 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 public interface CommandHandler {
 
-    void handlerMesaage(Update update, SendMessage response);
+    void handlerMessage(Update update, SendMessage response);
 }
