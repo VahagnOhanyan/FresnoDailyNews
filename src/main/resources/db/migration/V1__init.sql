@@ -1,4 +1,4 @@
-create table news
+create table fresnodailynews.news
 (
     id          bigint primary key AUTO_INCREMENT,
     url         varchar(2000),
@@ -17,7 +17,7 @@ create table news
 
 );
 
-create table users
+create table fresnodailynews.users
 (
     telegram_id varchar(50)  primary key not null,
     first_name  varchar(500) not null,
@@ -25,3 +25,8 @@ create table users
     username    varchar(100) not null
 
   );
+create table fresnodailynews.verbs
+(
+    verb varchar(50) primary key not null,
+    forms  BLOB
+);

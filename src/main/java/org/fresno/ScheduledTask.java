@@ -2,6 +2,7 @@ package org.fresno;
 
 import lombok.RequiredArgsConstructor;
 import org.asynchttpclient.Response;
+import org.fresno.adapter.grpc.ExtractKeywordsClient;
 import org.fresno.adapter.telegram.TelegramAdapter;
 import org.fresno.domain.News;
 import org.fresno.domain.Verbs;
@@ -24,17 +25,18 @@ public class ScheduledTask {
     private final NewsRepository newsRepository;
     private final VerbsRepository verbsRepository;
     private final TelegramAdapter telegramAdapter;
-    private final ExtractKeyWords findNewsDuplicate;
+    private final ExtractKeyWords extractKeyWords;
     private final GetVerbForms getVerbForms;
+    private final ExtractKeywordsClient extractKeywordsClient;
     private int score = 0;
     private int result = 0;
     private final static String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
     @Value("${channel.id}")
     String id;
 
-  //  @Scheduled(fixedRate = 1000000)
+    //  @Scheduled(fixedRate = 1000000)
     public void updateVerbs() {
-        /*for (String l :
+        for (String l :
                 letters) {
 
             System.out.println("start");
@@ -56,7 +58,7 @@ public class ScheduledTask {
                 }
             }
 
-        }*/
+        }
 
         List<Verbs> allVerbs = verbsRepository.findAll();
         for (Verbs v :
@@ -76,7 +78,7 @@ public class ScheduledTask {
         }
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 7200000)
     public void checkUpdates() {
         try {
             Response response = newsService.get();
@@ -90,7 +92,8 @@ public class ScheduledTask {
                 String url = String.valueOf(article.get("url"));
                 String title = String.valueOf(article.get("title"));
                 String description = String.valueOf(article.get("description"));
-                String keywords = findNewsDuplicate.extractKeyWords(title);
+                // String keywords = extractKeyWords.extractKeyWords(title);
+                String keywords = extractKeywordsClient.sendText(title);
                 String keywords2 = "";
                 List<News> allNews = newsRepository.findAll();
                 for (News n :
@@ -106,7 +109,8 @@ public class ScheduledTask {
                         break;
                     }
                     if (n.getKeywords() == null || n.getKeywords().equals("")) {
-                        keywords2 = findNewsDuplicate.extractKeyWords(n.getTitle());
+                        // keywords2 = extractKeyWords.extractKeyWords(n.getTitle());
+                        keywords2 = extractKeywordsClient.sendText(n.getTitle());
                         System.out.println("extracted keywords: " + keywords);
                         System.out.println("extracted keywords2: " + keywords2);
                         n.setKeywords(keywords2);
@@ -125,7 +129,7 @@ public class ScheduledTask {
                     int textLengthHalf = textLength / 2;
                     System.out.println("textLength: " + textLength);
                     System.out.println("textLengthHalf: " + textLengthHalf);
-                    if (result > textLengthHalf) {
+                    if (result >= textLengthHalf) {
                         isDuplicate = true;
                     }
                     System.out.println("isDuplicate: " + isDuplicate);
@@ -212,7 +216,6 @@ public class ScheduledTask {
         Set<String> wordSynKeysSet = wordSynMap.keySet();
         for (String k :
                 wordSynKeysSet) {
-
             boolean exists = findIn(k, wordSynMap2);
             if (!exists) {
                 for (String v :
@@ -232,14 +235,14 @@ public class ScheduledTask {
         outer:
         for (String k2 :
                 wordSynMap2.keySet()) {
-            if (k.equals(k2)) {
+            if (k.equalsIgnoreCase(k2)) {
                 exists = true;
                 score = score + 1;
                 break;
             } else {
                 for (String v2 :
                         wordSynMap2.get(k2)) {
-                    if (k.equals(v2)) {
+                    if (k.equalsIgnoreCase(v2)) {
                         exists = true;
                         score = score + 1;
                         break outer;

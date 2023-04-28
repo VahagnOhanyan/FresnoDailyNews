@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.fresno.adapter.grpc";
+option java_outer_classname = "FresnoDailyNewsService";
+
+package fresnodailynews;
+
+service FresnoDailyNews {
+    rpc ExtractKeyword (ExtractKeywordsRequest) returns (ExtractKeywordsResponse) {}
+}
+
+message ExtractKeywordsRequest {
+    string message = 1;
+}
+
+message ExtractKeywordsResponse {
+    string reply = 1;
+}
