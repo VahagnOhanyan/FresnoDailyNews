@@ -17,7 +17,7 @@ public class FresnoNewsApplication {
 
     @Bean(name = "channel")
     public Channel channel() {
-        String serverAddress = "dns:///fdn_py_container:50051";
+        String serverAddress = "localhost:50051";
         return ManagedChannelBuilder.forTarget(serverAddress)
                 .usePlaintext()
                 .build();

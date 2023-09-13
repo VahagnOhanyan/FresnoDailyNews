@@ -6,23 +6,16 @@ import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.ListenableFuture;
 import org.asynchttpclient.Response;
-import org.fresno.domain.News;
 import org.fresno.repo.NewsRepository;
 import org.fresno.repo.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -56,31 +49,39 @@ public class TelegramBotAdapter extends TelegramLongPollingBot implements Telegr
     @Override
     public void onUpdateReceived(Update update) {
         log.info("Message received: {}", update);
-        if (update.hasMessage()) {
-            var response = new SendMessage();
-            if (update.getMessage().getText() != null) {
-                if (update.getMessage().getText().equals(CMD_START)) {
-                    messageHandlers.get("startCommandHandler").handlerMessage(update, response);
+        if (update.hasCallbackQuery()) {
+            handleButtonClicked(update.getCallbackQuery().getData());
+        } else {
+            if (update.hasMessage()) {
+                var response = new SendMessage();
+                if (update.getMessage().getText() != null) {
+                    if (update.getMessage().getText().equals(CMD_START)) {
+                        messageHandlers.get("startCommandHandler").handlerMessage(update, response);
+                    } else {
+                        messageHandlers.get("newsHandler").handlerMessage(update, response);
+                        updateNews(id, update.getMessage().getText(), "", "");
+                    }
                 } else {
-                    messageHandlers.get("newsHandler").handlerMessage(update, response);
-                    updateNews(id, update.getMessage().getText(), "", "");
-                }
-            } else {
-                if (update.getMessage().getCaptionEntities().size() > 0) {
+                    if (update.getMessage().getCaptionEntities().size() > 0) {
                  /*   for (int i = 0; i < update.getMessage().getCaptionEntities().size(); i++) {
                     }*/
 
-                    messageHandlers.get("newsHandler").handlerMessage(update, response);
-                    updateNews(id, update.getMessage().getCaptionEntities().get(0).getText(), "", "");
+                        messageHandlers.get("newsHandler").handlerMessage(update, response);
+                        updateNews(id, update.getMessage().getCaptionEntities().get(0).getText(), "", "");
+                    }
+                }
+                try {
+                    execute(response);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
                 }
             }
-            try {
-                execute(response);
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
-            }
         }
+    }
 
+
+    public void handleButtonClicked(String callbackData) {
+        System.out.println("Button clicked: " + callbackData);
     }
 
     @Override
@@ -89,17 +90,17 @@ public class TelegramBotAdapter extends TelegramLongPollingBot implements Telegr
         try (client) {
             System.out.println("message: " + message);
             System.out.println("url: " + url);
-            String markdownText = "_" + message + "_" + "\n\n[Follow the link\n](" + url + ")";
+            String markdownText = "_" + message + "\n\n[Follow the link\n](" + url + ")";
             ListenableFuture<Response> res = client.prepare("POST", "https://api.telegram.org/bot" + token + "/sendMessage")
                     .setHeader("accept", "application/json")
                     .setHeader("content-type", "application/json")
-                    .setBody("{\"text\":\"" + markdownText + "\"," +
+                    .setBody("{\"text\":\"" + message + "\"," +
                             "\"parse_mode\":\"Markdown\"," +
                             "\"disable_web_page_preview\":false," +
                             "\"disable_notification\":false," +
                             "\"reply_to_message_id\":null," +
+                           // "\"reply_markup\": {\"inline_keyboard\":[[{\"text\":\"Translate\",\"callback_data\":\"" + markdownText + "\"}]]}," +
                             "\"chat_id\":\"" + telegramId + "\"}")
-
                     .execute();
 
 

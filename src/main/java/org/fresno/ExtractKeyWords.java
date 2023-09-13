@@ -16,7 +16,7 @@ public class ExtractKeyWords {
     public String extractKeyWords(String t) {
         try {
 
-            config.setServerURL(new URL("http://fdn_py_container:8000/"));
+            config.setServerURL(new URL("http://localhost:8000/"));
             client.setConfig(config);
             Object[] params = new Object[]{t};
             String result = (String) client.execute("extract_keywords", params);

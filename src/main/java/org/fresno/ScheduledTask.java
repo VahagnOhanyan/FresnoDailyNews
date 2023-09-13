@@ -81,6 +81,12 @@ public class ScheduledTask {
     @Scheduled(fixedRate = 7200000)
     public void checkUpdates() {
         try {
+            Response res = telegramAdapter.updateNews(id, "hello", "", "");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+       /* try {
             Response response = newsService.get();
             System.out.println("checkUpdates...................................................");
             var data = new JSONObject(response.getResponseBody());
@@ -184,7 +190,7 @@ public class ScheduledTask {
 
 
             }
-        }
+        }*/
 
     }
 
